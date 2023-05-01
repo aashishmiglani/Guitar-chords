@@ -56,12 +56,12 @@ server.get("/chords", async (req, res) => {
 
     const allCredits = await creditsSchema.find({})
     res.status(200).json(allCredits)
- 
+
 
 
 })
 server.get("/chords-files", async (req, res) => {
-    
+
 
     const allData = await chords_guitarSchema.find({})
     res.status(200).json(allData)
