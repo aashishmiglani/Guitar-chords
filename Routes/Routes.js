@@ -15,7 +15,7 @@ const pdf = require('pdf-parse');
 
 const uploadExcel = require("../Multer/excelMulter")
 const uploadPdf = require("../Multer/pdfMulter")
-
+const uploadExcelPdf = require("../Multer/excelPdfMulter")
 
 
 
@@ -66,7 +66,7 @@ router.post("/chords", async (req, res) => {
 
 
 
-router.post("/import-chords-details", uploadExcel.single("excel_dat"), async (req, res) => {
+router.post("/import-chords-details", uploadExcelPdf.single("excel_data"), async (req, res) => {
     let filename = "./excel/" + req.file.filename
     let workbook = xlsx.readFile(filename)
     const worksheet = workbook.Sheets[workbook.SheetNames[0]];
@@ -76,10 +76,16 @@ router.post("/import-chords-details", uploadExcel.single("excel_dat"), async (re
 
     const pdfBuffer = fs.readFileSync(filePath)
     const text = await pdf(pdfBuffer)
-    console.log(text)
+    for (let i = 0; i < data.length; i++) {
+        console.log(data[i], text.text)
+
+    }
+
+    // const allChordsData = new chords_guitarSchema(req.body)
+    // allChordsData.pdf_file = text.text
 
 
-    res.status(200)
+    res.status(200).send(data)
 
 })
 
