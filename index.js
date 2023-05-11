@@ -1,14 +1,30 @@
 const express = require("express")
 const mongoose = require("mongoose")
 const bodyParser = require("body-parser")
+const allRoutes = require("./Routes/Routes")
 
-const creditsSchema = require("./Schemas/creditsSchema.js")
-const chords_guitarSchema = require("./Schemas/ChordsSchema.js")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 const server = express()
+
 server.use(bodyParser.json())
 
+server.use(express.urlencoded({ extended: false }))
 
 
 main().catch(err => console.log(err));
@@ -22,50 +38,11 @@ async function main() {
 
 
 
+server.use("/", allRoutes)
 
 
 
 
-
-
-
-
-
-
-server.post("/chords", async (req, res) => {
-    const chordsCreditsSchema = new creditsSchema(req.body)
-    let data = await chordsCreditsSchema.save()
-    res.status(200).json(data)
-    // res.json(req.body)
-
-})
-
-
-server.post("/chords-files", async (req, res) => {
-    const allChordsData = new chords_guitarSchema(req.body)
-    let data = await allChordsData.save()
-    res.status(200).json(data)
-    // res.json(req.body)
-
-})
-
-
-
-
-server.get("/chords", async (req, res) => {
-
-    const allCredits = await creditsSchema.find({})
-    res.status(200).json(allCredits)
-
-
-
-})
-server.get("/chords-files", async (req, res) => {
-
-
-    const allData = await chords_guitarSchema.find({})
-    res.status(200).json(allData)
-})
 
 
 

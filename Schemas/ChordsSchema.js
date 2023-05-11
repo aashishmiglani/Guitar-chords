@@ -2,14 +2,24 @@ const mongoose = require("mongoose")
 const creditsSchema = require("./creditsSchema")
 
 
+const Schema = mongoose.Schema;
+
+
 
 
 
 
 
 const chordsGuitarSchema = new mongoose.Schema({
-    "song_name": { type: String, required: true, unique: true },
-    "Pdf_name": { type: "ObjectId", ref: creditsSchema }
+    "chord_id": { type: mongoose.Schema.Types.ObjectId, ref: "creditsSchema", required: true },
+
+    "chord_type": { type: String, required: false },
+    "family_chords": { type: String, required: false },
+    "strumming_type": { type: String, required: false },
+    "strumming_pattern": { type: String, required: false },
+    "pdf_file": Schema.Types.Mixed
+
+
 })
 
 
