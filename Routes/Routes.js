@@ -14,6 +14,11 @@ server.use(express.urlencoded({ extended: true }))
 
 const creditsSchema = require("../Schemas/creditsSchema")
 const chords_guitarSchema = require("../Schemas/ChordsSchema")
+const songsRequestSchema = require("../Schemas/RequestASongSchema")
+const openMics = require("../Schemas/openMics")
+
+
+
 const xlsx = require("xlsx")
 const fs = require("fs")
 
@@ -33,31 +38,36 @@ const uploadExcelPdf = require("../Multer/excelPdfMulter")
 //GET APIs (READ)
 router.get("/chords", async (req, res) => {
     // console.log(req.singer)
-    console.log(req.query.album_name)
     let pageLimit = Number(req.query.limit)
     let pageNumber = Number(req.query.page)
     let skipData = (pageNumber - 1) * pageLimit
     let allCredits
 
     req.query.singer ?
-        allCredits = await creditsSchema.find({ singer: new RegExp(req.query.singer, "i") }) :
+        allCredits = await creditsSchema.find({ singer: new RegExp(req.query.singer, "i") }).skip((pageNumber && pageLimit) ? skipData : 0).limit((pageNumber && pageLimit) ? pageLimit : 10) :
         req.query.song_name ?
-            allCredits = await creditsSchema.find({ song_name: new RegExp(req.query.song_name, "i") }) :
+            allCredits = await creditsSchema.find({ song_name: new RegExp(req.query.song_name, "i") }).skip((pageNumber && pageLimit) ? skipData : 0).limit((pageNumber && pageLimit) ? pageLimit : 10) :
             req.query.album_name ?
-                allCredits = await creditsSchema.find({ album_name: new RegExp(req.query.album_name, "i") }) :
+                allCredits = await creditsSchema.find({ album_name: new RegExp(req.query.album_name, "i") }).skip((pageNumber && pageLimit) ? skipData : 0).limit((pageNumber && pageLimit) ? pageLimit : 10) :
                 allCredits = await creditsSchema.find({}).skip((pageNumber && pageLimit) ? skipData : 0).limit((pageNumber && pageLimit) ? pageLimit : 10)
 
 
 
-    const allCreditsTotalData = await creditsSchema.find({})
+    let allCreditsTotalData
+    if (req.query.singer || req.query.song_name || req.query.album_name) allCreditsTotalData = allCredits
+    else allCreditsTotalData = await creditsSchema.find({})
+
+
+
 
     let pageResponse = {
         "next": pageNumber ? pageNumber + 1 : null,
         "previous": pageNumber ? pageNumber - 1 : null,
         "limit": pageLimit ? pageLimit : 10,
-        "totalPages": allCreditsTotalData?.length / pageLimit,
+        "totalPages": Math.floor(allCreditsTotalData?.length / pageLimit),
         "results": allCredits
     }
+
     res.status(200).json(pageResponse)
 
 })
@@ -79,6 +89,28 @@ router.post("/chords", async (req, res) => {
     res.status(200).json(data)
 
 })
+
+
+router.get("/request-a-song", async (req, res) => {
+
+    const getSongRequest = await songsRequestSchema.find({})
+    res.status(200).json(getSongRequest)
+
+})
+
+
+
+
+router.post("/request-a-song", async (req, res) => {
+
+    const songRequest = new songsRequestSchema(req.body)
+    let data = await songRequest.save()
+    res.status(200).json(data)
+})
+
+
+
+
 
 
 
@@ -170,6 +202,25 @@ router.get("/chords-files-data", async (req, res) => {
     const addDataChords = allData = await chords_guitarSchema.find().populate("chord_id")
     res.status(200).json(addDataChords)
 })
+
+
+
+
+router.post("/open-mic-event-registraion", async (req, res) => {
+    const openMicEvents = new openMics(req.body)
+    let data = await openMicEvents.save()
+    res.status(200).json(data)
+})
+
+
+router.get("/open-mic-event-registraion", async (req, res) => {
+    const openMicEvents = await openMics.find({})
+    res.status(200).json(openMicEvents)
+})
+
+
+
+
 
 
 
