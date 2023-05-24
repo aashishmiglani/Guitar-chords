@@ -4,11 +4,6 @@ const bodyParser = require("body-parser")
 const allRoutes = require("./Routes/Routes")
 const cors = require('cors');
 
-const corsOptions = {
-    origin: 'http://localhost:3000/',
-    credentials: true,
-    optionSuccessStatus: 200
-}
 
 
 
@@ -30,7 +25,7 @@ const corsOptions = {
 
 const server = express()
 
-server.use(cors(corsOptions));
+server.use(cors());
 server.use(bodyParser.json())
 
 server.use(express.urlencoded({ extended: false }))
