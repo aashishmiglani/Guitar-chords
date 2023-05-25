@@ -1,8 +1,8 @@
 const express = require("express")
 const server = express()
 const path = require("path")
-const mongoose = require("mongoose")
-
+const xlsx = require("xlsx")
+const fs = require("fs")
 
 
 
@@ -11,16 +11,15 @@ server.use(express.urlencoded({ extended: true }))
 
 
 
-
+// All the Schemas
 const creditsSchema = require("../Schemas/creditsSchema")
 const chords_guitarSchema = require("../Schemas/ChordsSchema")
 const songsRequestSchema = require("../Schemas/RequestASongSchema")
 const openMics = require("../Schemas/openMics")
+const musicWalkSchema = require("../Schemas/musicWalk")
 
 
 
-const xlsx = require("xlsx")
-const fs = require("fs")
 
 const pdf = require('pdf-parse');
 
@@ -37,7 +36,6 @@ const uploadExcelPdf = require("../Multer/excelPdfMulter")
 
 //GET APIs (READ)
 router.get("/chords", async (req, res) => {
-    // console.log(req.singer)
     let pageLimit = Number(req.query.limit)
     let pageNumber = Number(req.query.page)
     let skipData = (pageNumber - 1) * pageLimit
@@ -80,8 +78,6 @@ router.get("/chords/:id", async (req, res) => {
 })
 
 
-
-
 //POST API (CREATE)
 router.post("/chords", async (req, res) => {
     const chordsCreditsSchema = new creditsSchema(req.body)
@@ -89,7 +85,6 @@ router.post("/chords", async (req, res) => {
     res.status(200).json(data)
 
 })
-
 
 router.get("/request-a-song", async (req, res) => {
 
@@ -99,19 +94,12 @@ router.get("/request-a-song", async (req, res) => {
 })
 
 
-
-
 router.post("/request-a-song", async (req, res) => {
 
     const songRequest = new songsRequestSchema(req.body)
     let data = await songRequest.save()
     res.status(200).json(data)
 })
-
-
-
-
-
 
 
 router.post("/import-chords", uploadExcel.single("excel"), async (req, res) => {
@@ -127,8 +115,6 @@ router.post("/import-chords", uploadExcel.single("excel"), async (req, res) => {
     res.status(200).json(data)
 
 })
-
-
 
 router.post("/import-chords-details", uploadExcelPdf.single("excel_data"), async (req, res) => {
     let filename = "./excel/" + req.file.filename
@@ -154,15 +140,6 @@ router.post("/import-chords-details", uploadExcelPdf.single("excel_data"), async
 })
 
 
-
-
-
-
-
-
-
-
-
 //PATCH/UPDATE API (UPDATE)
 router.patch("/chords/:id", async (req, res) => {
     let _id = req.params.id
@@ -173,23 +150,26 @@ router.patch("/chords/:id", async (req, res) => {
     res.status(200).json(updateData)
 })
 
-
-
-
 router.get("/chords-files", async (req, res) => {
     const allData = await chords_guitarSchema.find({})
+    console.log(allData)
+    // let data={
+    //     file:
+    // }
     res.status(200).json(allData)
 })
 
+router.post("/chords-files", uploadPdf.single("pdf-file"), async (req, res) => {
 
+    let filename = "/uploads/" + req.file.filename
+    console.log(req.file)
+    // const pdfBuffer = fs.readFileSync(filename)
+    // const text = await pdf(pdfBuffer)
+    
 
-router.post("/chords-files", uploadPdf.single("pdf_file"), async (req, res) => {
-
-    let filename = "./uploads/" + req.file.filename
-    const pdfBuffer = fs.readFileSync(filename)
-    const text = await pdf(pdfBuffer)
+    
     const allChordsData = new chords_guitarSchema(req.body)
-    allChordsData.pdf_file = text.text
+    allChordsData.pdf_file = filename
     let data = await allChordsData.save()
     res.status(200).json(data)
 
@@ -200,6 +180,14 @@ router.post("/chords-files", uploadPdf.single("pdf_file"), async (req, res) => {
 
 router.get("/chords-files-data", async (req, res) => {
     const addDataChords = allData = await chords_guitarSchema.find().populate("chord_id")
+    res.status(200).json(addDataChords)
+})
+
+
+router.get("/chords-files-data/:id", async (req, res) => {
+    let iid = req.params.id
+
+    const addDataChords = allData = await chords_guitarSchema.findById(iid).populate("chord_id")
     res.status(200).json(addDataChords)
 })
 
@@ -217,6 +205,22 @@ router.get("/open-mic-event-registraion", async (req, res) => {
     const openMicEvents = await openMics.find({})
     res.status(200).json(openMicEvents)
 })
+
+
+
+
+router.get("/music-walk-event-registraion", async (req, res) => {
+    const openMicEvents = await musicWalkSchema.find({})
+    res.status(200).json(openMicEvents)
+})
+
+
+router.post("/music-walk-event-registraion", async (req, res) => {
+    const musicWalk = new musicWalkSchema(req.body)
+    let data = await musicWalk.save()
+    res.status(200).json(data)
+})
+
 
 
 
