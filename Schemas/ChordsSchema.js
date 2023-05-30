@@ -24,7 +24,7 @@ const chordsGuitarSchema = new mongoose.Schema({
 
 
 
-const chords_guitarSchema = mongoose.model("chords_guitarSchem", chordsGuitarSchema)
+const chords_guitarSchema = mongoose.model("chords_guitarSchema", chordsGuitarSchema)
 
 
 module.exports = chords_guitarSchema
